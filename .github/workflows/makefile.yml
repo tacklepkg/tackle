@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: sudo apt install tcllib
+      run: sudo apt install tcl8.6 tcllib expect
       
     - name: Make
       run: make
