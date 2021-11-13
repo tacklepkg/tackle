@@ -1,10 +1,5 @@
 #//#
 # Tackle is a package manager for the Tcl programming language.
-# This file provides a command-line interface, e.g.:
-# <pre>
-#   $ tackle ls
-#   tcllib
-# </pre
 #
 # @author    nat-418
 # @version   0.0.7
