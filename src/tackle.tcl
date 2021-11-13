@@ -20,6 +20,8 @@
 package require http
 package require tls
 
+set version 0.0.6
+
 # We begin by inlining a few dependencies
 # =======================================
 
@@ -354,6 +356,11 @@ set command     [lindex $argv 0]
 set arguments   [lrange $argv 1 end]
 set tacklepath  [file join $::env(HOME) .local share tackle]
 set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
+
+if {$command eq "version" || $command eq "--version" || $command eq "-v"} {
+    puts $version
+    exit
+}
 
 # Create tracker file if it does not already exist.
 close [open $trackerFile a]

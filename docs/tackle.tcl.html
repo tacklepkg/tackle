@@ -36,6 +36,8 @@ Tackle package manager API documentation
 package require http
 package require tls
 
+set version 0.0.6
+
 <font color="#208020"># We begin by inlining a few dependencies</font>
 <font color="#208020"># =======================================</font>
 
@@ -49,7 +51,7 @@ namespace eval ::targz {
     <font color="#208020"># @param  targz       Path to some file.tar.gz</font>
     <font color="#208020"># @param  destination Path to an output directory for the archive contents</font>
     <font color="#208020"># @return Path to the unarchived destination directory</font>
-    <strong><a name="unpack_36">proc <a href="tackle.tcl-annot.html#unpack">unpack</a></a></strong><a name="unpack"></a> {targz destination} {
+    <strong><a name="unpack_38">proc <a href="tackle.tcl-annot.html#unpack">unpack</a></a></strong><a name="unpack"></a> {targz destination} {
         try {
             set unpacked  [lindex [exec tar -xvzf $targz] 0]
             set directory [file join $destination $unpacked]
@@ -123,7 +125,7 @@ namespace eval ::httpRedirects {
     <font color="#208020"># @param  args Options to pass to ::http::geturl</font>
     <font color="#208020"># @return Token representing the respons to the request</font>
     <font color="#208020"># @see    https://www.tcl.tk/man/tcl/TclCmd/http.html#M17</font>
-    <strong><a name="geturl_110">proc <a href="tackle.tcl-annot.html#geturl">geturl</a></a></strong><a name="geturl"></a> {url args} {
+    <strong><a name="geturl_112">proc <a href="tackle.tcl-annot.html#geturl">geturl</a></a></strong><a name="geturl"></a> {url args} {
         array set URI [::uri::split $url]
         for {set i 0} {$i &lt; 5} {incr i} {
             set token [::http::geturl $url {*}$args]
@@ -159,7 +161,7 @@ namespace eval ::termColor {
     <font color="#208020"># @param  str  String to be colored</font>
     <font color="#208020"># @return String with proper escape codes</font>
     <font color="#208020"># @see    https://en.wikipedia.org/wiki/ANSI_escape_code</font>
-    <strong><a name="highlight_146">proc <a href="tackle.tcl-annot.html#highlight">highlight</a></a></strong><a name="highlight"></a> {code str} {
+    <strong><a name="highlight_148">proc <a href="tackle.tcl-annot.html#highlight">highlight</a></a></strong><a name="highlight"></a> {code str} {
         append result &quot;\033\[$code&quot;;
         append result $str
         append result &quot;\033\[0m&quot;;
@@ -167,10 +169,10 @@ namespace eval ::termColor {
         return $result
     }
 
-    <strong><a name="bright_154">proc <a href="tackle.tcl-annot.html#bright">bright</a></a></strong><a name="bright"></a> str {<a name="highlight(1)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;29m&quot; $str}
-    <strong><a name="red_155">proc <a href="tackle.tcl-annot.html#red">red</a></a></strong><a name="red"></a>    str {<a name="highlight(2)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;31m&quot; $str}
-    <strong><a name="green_156">proc <a href="tackle.tcl-annot.html#green">green</a></a></strong><a name="green"></a>  str {<a name="highlight(3)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;32m&quot; $str}
-    <strong><a name="yellow_157">proc <a href="tackle.tcl-annot.html#yellow">yellow</a></a></strong><a name="yellow"></a> str {<a name="highlight(4)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;33m&quot; $str}
+    <strong><a name="bright_156">proc <a href="tackle.tcl-annot.html#bright">bright</a></a></strong><a name="bright"></a> str {<a name="highlight(1)"><a href="./tackle.tcl.html#highlight_148">highlight</a></a> &quot;1;29m&quot; $str}
+    <strong><a name="red_157">proc <a href="tackle.tcl-annot.html#red">red</a></a></strong><a name="red"></a>    str {<a name="highlight(2)"><a href="./tackle.tcl.html#highlight_148">highlight</a></a> &quot;1;31m&quot; $str}
+    <strong><a name="green_158">proc <a href="tackle.tcl-annot.html#green">green</a></a></strong><a name="green"></a>  str {<a name="highlight(3)"><a href="./tackle.tcl.html#highlight_148">highlight</a></a> &quot;1;32m&quot; $str}
+    <strong><a name="yellow_159">proc <a href="tackle.tcl-annot.html#yellow">yellow</a></a></strong><a name="yellow"></a> str {<a name="highlight(4)"><a href="./tackle.tcl.html#highlight_148">highlight</a></a> &quot;1;33m&quot; $str}
 }
 
 <font color="#208020"># Here we define the procedures of Tackle proper</font>
@@ -180,7 +182,7 @@ namespace eval ::termColor {
 <font color="#208020">#</font>
 <font color="#208020"># @param  url  URL target for the HTTP request</font>
 <font color="#208020"># @return Body of the HTTP response</font>
-<strong><a name="fetch_167">proc <a href="tackle.tcl-annot.html#fetch">fetch</a></a></strong><a name="fetch"></a> url {
+<strong><a name="fetch_169">proc <a href="tackle.tcl-annot.html#fetch">fetch</a></a></strong><a name="fetch"></a> url {
     set token [::httpRedirects::geturl $url]
     set code  [::http::ncode $token]
     set data  [::http::data $token]
@@ -198,7 +200,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  tracker Dictionary of installed packages</font>
 <font color="#208020"># @param  query   String of what package we are looking for</font>
 <font color="#208020"># @return Void: side-effect is to print search results</font>
-<strong><a name="search_185">proc <a href="tackle.tcl-annot.html#search">search</a></a></strong><a name="search"></a> {index tracker {query &quot;&quot;}} {
+<strong><a name="search_187">proc <a href="tackle.tcl-annot.html#search">search</a></a></strong><a name="search"></a> {index tracker {query &quot;&quot;}} {
     try {
         set names [dict keys $index]
     } on error msg {
@@ -228,7 +230,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  tracker Dictionary of installed packages</font>
 <font color="#208020"># @param  names   List of package names to install</font>
 <font color="#208020"># @return         Updated dictionary of installed packages</font>
-<strong><a name="add_215">proc <a href="tackle.tcl-annot.html#add">add</a></a></strong><a name="add"></a> {index tracker names} {
+<strong><a name="add_217">proc <a href="tackle.tcl-annot.html#add">add</a></a></strong><a name="add"></a> {index tracker names} {
     upvar tacklepath destination
 
     set installed      [dict keys $tracker]
@@ -245,7 +247,7 @@ namespace eval ::termColor {
         dict with index $name {
             file mkdir $destination
              
-            set payload  [<a name="fetch(1)"><a href="./tackle.tcl.html#fetch_167">fetch</a></a> $url]
+            set payload  [<a name="fetch(1)"><a href="./tackle.tcl.html#fetch_169">fetch</a></a> $url]
             set filename [file join $destination [file tail $url]]
 
             set channel [open $filename wb]
@@ -277,7 +279,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  tracker Dictionary of installed packages</font>
 <font color="#208020"># @param  names   List of package names to uninstall</font>
 <font color="#208020"># @return Updated dictionary of installed packages</font>
-<strong><a name="rm_264">proc <a href="tackle.tcl-annot.html#rm">rm</a></a></strong><a name="rm"></a> {tracker names} {
+<strong><a name="rm_266">proc <a href="tackle.tcl-annot.html#rm">rm</a></a></strong><a name="rm"></a> {tracker names} {
     upvar tacklepath destination
 
     set installed      [dict keys $tracker]
@@ -315,7 +317,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  tracker Dictionary of installed packages</font>
 <font color="#208020"># @param  pattern Glob-style pattern of package names</font>
 <font color="#208020"># @return Void: side-effect is to print package names to the console.</font>
-<strong><a name="ls_302">proc <a href="tackle.tcl-annot.html#ls">ls</a></a></strong><a name="ls"></a> {tracker pattern} {
+<strong><a name="ls_304">proc <a href="tackle.tcl-annot.html#ls">ls</a></a></strong><a name="ls"></a> {tracker pattern} {
     set names [dict keys $tracker]
 
     if {$names eq &quot;&quot;} exit
@@ -330,7 +332,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  tracker Dictionary of installed packages</font>
 <font color="#208020"># @param  name    Name of a pattern to detail</font>
 <font color="#208020"># @return Void: side-effect is to print package details to the console.</font>
-<strong><a name="show_317">proc <a href="tackle.tcl-annot.html#show">show</a></a></strong><a name="show"></a> {tracker name} {
+<strong><a name="show_319">proc <a href="tackle.tcl-annot.html#show">show</a></a></strong><a name="show"></a> {tracker name} {
     try {
         set names [dict keys $tracker]
     } on error msg {
@@ -371,6 +373,11 @@ set arguments   [lrange $argv 1 end]
 set tacklepath  [file join $::env(HOME) .local share tackle]
 set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
 
+if {$command eq &quot;version&quot; || $command eq &quot;--version&quot; || $command eq &quot;-v&quot;} {
+    puts $version
+    exit
+}
+
 <font color="#208020"># Create tracker file if it does not already exist.</font>
 close [open $trackerFile a]
 
@@ -392,7 +399,7 @@ if {$command eq &quot;search&quot; || $command eq &quot;add&quot;} {
         ::http::register https 443 [list ::tls::socket -tls1 1]
 
         <font color="#208020"># Get the latest available packages</font>
-        set index [<a name="fetch(2)"><a href="./tackle.tcl.html#fetch_167">fetch</a></a> \
+        set index [<a name="fetch(2)"><a href="./tackle.tcl.html#fetch_169">fetch</a></a> \
             https://raw.githubusercontent.com/tacklepkg/packages/master/index.tackle]
     } on error msg {
         puts &quot;[::termColor::red Error:] could not fetch package index.&quot;
@@ -414,7 +421,7 @@ close $channel2
 <a href="index_main.html#byprocname">procedure name</a> |
 <a href="index_main.html#bycall">procedure call</a> |
 <a href="index_annot_full.html">annotation</a><br>
-<cite>Index generated 2021-11-13 at 14:45.</cite>
+<cite>Index generated 2021-11-13 at 14:55.</cite>
 </font>
 </body>
 </html>
