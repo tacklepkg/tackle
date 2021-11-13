@@ -1,4 +1,4 @@
-lappend auto_path ../src/tackle.vfs/lib/
+set auto_path ../src/tackle.vfs/lib/
 
 package require Tcl 8.5
 package require Markdown
