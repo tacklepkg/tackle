@@ -1,5 +1,5 @@
 #!/usr/bin/env expect
-log_user 1
+log_user 0
 
 # begin with a clean slate
 set preinstalled false
