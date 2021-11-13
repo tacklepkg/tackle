@@ -19,6 +19,7 @@
 #//#
 package require http
 package require tls
+package require textutil
 
 set version 0.0.6
 
@@ -193,12 +194,19 @@ proc search {index tracker {query ""}} {
 
     foreach name [lsearch -inline -all $names $query*] {
         dict with index $name {
+            if [dict exists $tracker $name] {
+                set installed [::termColor::yellow installed]
+            } else {
+                set installed ""
+            }
+
             if {$type eq "module"} {
                 set hiName [::termColor::yellow $name]
             } else {
                 set hiName [::termColor::green $name]
             }
-            puts "$hiName [::termColor::bright v$version]"
+
+            puts "$hiName [::termColor::bright v$version] $installed"
             puts "  $description"
             puts "  [string totitle $type] URL: $url"
             puts ""
@@ -215,7 +223,7 @@ proc search {index tracker {query ""}} {
 # @param  names   List of package names to install
 # @return         Updated dictionary of installed packages
 proc add {index tracker names} {
-    upvar tacklepath destination
+    upvar 2 tacklepath destination
 
     set installed      [dict keys $tracker]
     set updatedTracker $tracker
@@ -264,8 +272,6 @@ proc add {index tracker names} {
 # @param  names   List of package names to uninstall
 # @return Updated dictionary of installed packages
 proc rm {tracker names} {
-    upvar tacklepath destination
-
     set installed      [dict keys $tracker]
     set updatedTracker $tracker
 
@@ -346,10 +352,97 @@ proc show {tracker name} {
 # Below we handle user input, execute commands, etc.
 # ==================================================
 
-# Do nothing by default
-if {$argc eq 0} {
-    puts "[::termColor::red Error:] no input given."
-    exit 1
+# Detect whether command-line flags are present
+#
+# @param  args  Command-line arguments (e.g. $argv)
+# @param  flags List of flags to look for
+# @return Boolean where true indicates presence of at least one flag
+proc hasFlags {args flags} {
+    foreach flag $flags {
+        if {$flag in $args} {
+            return true
+        }
+    }
+    return false
+}
+
+# Get the record of what is installed
+#
+# @param  trackerFile Path to the tacker.tackle file
+# @return Contents of the file
+proc readTracker trackerFile {
+    set channel [open $trackerFile r]
+    set data    [read $channel]
+    close $channel
+
+    return $data
+}
+
+# Update our record of what is installed
+#
+# @param  trackerFile Path to the tacker.tackle file
+# @param  data        Updated data
+# @return Void. Side-effect: write data to tracker file
+proc writeTracker {trackerFile data} {
+    set channel [open $trackerFile w+]
+    puts -nonewline $channel $data
+    close $channel
+}
+
+# Get and set tracker data with operations
+#
+# @param  trackerFile Path to the tacker.tackle file
+# @param  body        Operations to perform with tracker data
+# @return Void. Side-effect: preform body and write tracker data
+proc withTracker {trackerFile body} {
+    try {
+        set tracker [readTracker $trackerFile]
+    } on error msg {
+        puts "[::termColor::red Error:] could not read tracker file."
+        exit 1
+    }
+
+    eval $body
+    
+    try {
+        writeTracker $trackerFile $tracker
+    } on error msg {
+        puts "[::termColor::red Error:] could not write tracker file."
+        exit 1
+    }
+}
+
+set helpMessage [::textutil::undent [::textutil::trimEmptyHeading "
+    Tackle package manager version v$version
+    https://www.tacklepkg.com
+    
+    Usage
+      tackle \[command\] \[arguments...\]
+    
+    Meta Options
+      -h, --help     show list of command-line options
+      -v, --version  show version of tackle
+    
+    Commands
+      help           show list of command-line options
+      version        show version of tackle
+      search  QUERY  show packages available to install matching QUERY
+      add     NAMES  install   packages by NAMES
+      rm      NAMES  uninstall packages by NAMES
+      ls      QUERY  show installed packages matching QUERY
+      show    NAME   show details of installed package NAME
+"]]
+
+# Print help message by default
+if {$argc eq 0 || [hasFlags $argv {help -h --help}]} {
+    puts $helpMexsage
+    exit
+}
+
+# Print version information
+if {[hasFlags $argv {version -v --version}]} {
+    puts $version
+    exit
 }
 
 set command     [lindex $argv 0]
@@ -357,22 +450,23 @@ set arguments   [lrange $argv 1 end]
 set tacklepath  [file join $::env(HOME) .local share tackle]
 set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
 
-if {$command eq "version" || $command eq "--version" || $command eq "-v"} {
-    puts $version
-    exit
-}
-
 # Create tracker file if it does not already exist.
 close [open $trackerFile a]
 
-# Get the record of what is installed
-set channel [open $trackerFile r]
-set tracker [read $channel]
-close $channel
-
 # We don't need network or file modfication to check local state.
 if {$command eq "ls" || $command eq "show"} {
-    $command $tracker $arguments
+    try {
+        set tracker [readTracker $trackerFile]
+    } on error msg {
+        puts "[::termColor::red Error:] could not read tracker file."
+    }
+
+    try {
+        $command $tracker $arguments
+    } on error msg {
+        puts "[::termColor::red Error:] could not perform $command."
+    }
+
     exit
 }
 
@@ -389,12 +483,34 @@ if {$command eq "search" || $command eq "add"} {
         puts "[::termColor::red Error:] could not fetch package index."
         exit 1
     }
-    set tracker [$command $index $tracker $arguments]
-} else {
-    set tracker [$command $tracker $arguments]
+
+    withTracker $trackerFile {
+        upvar command cmd index ind arguments args
+        try {
+            set tracker [$cmd $ind $tracker $args]
+        } on error msg {
+            puts "[::termColor::red Error:] could not perform $cmd."
+            puts $msg
+            exit 1
+        }
+    }
+
+    exit
 }
 
-# Update our record of what is installed
-set channel2 [open $trackerFile w+]
-puts -nonewline $channel2 $tracker
-close $channel2
+if {$command eq "rm"} {
+    withTracker $trackerFile {
+        upvar command cmd arguments args
+        try {
+            set tracker [$cmd $tracker $args]
+        } on error msg {
+            puts "[::termColor::red Error:] could not perform $cmd."
+            puts $msg
+            exit 1
+        }
+    }
+
+    exit
+}
+
+puts $helpMessage
