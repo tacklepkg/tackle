@@ -16,4 +16,5 @@ default:
 
 install: default
 	chmod +x bin/tackle
+	mkdir -p ~/.local/bin
 	cp bin/tackle ~/.local/bin/tackle
