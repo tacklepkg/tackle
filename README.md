@@ -2,10 +2,6 @@
 
 A package manager for the Tcl programming language.
 
-![Makefile CI](https://github.com/tacklepkg/tackle/actions/workflows/makefile.yml/badge.svg)
-![Size](https://img.shields.io/github/size/tacklepkg/tackle/bin/tackle)
-![Downloads](https://img.shields.io/github/downloads/tacklepkg/tackle/total)
-
 For more information, API documenation, etc., please visit:
 [tacklepkg.com](https://www.tacklepkg.com)
 
