@@ -402,6 +402,10 @@ namespace eval ::termColor {
 <font color="#208020"># @param  trackerFile Path to the tacker.tackle file</font>
 <font color="#208020"># @return Contents of the file</font>
 <strong><a name="readTracker_388">proc <a href="tackle.tcl-annot.html#readTracker">readTracker</a></a></strong><a name="readTracker"></a> trackerFile {
+    <font color="#208020"># Create tracker file if it does not already exist.</font>
+    file mkdir [file root $trackerFile]
+    close [open $trackerFile a]
+
     set channel [open $trackerFile r]
     set data    [read $channel]
     close $channel
@@ -414,7 +418,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  trackerFile Path to the tacker.tackle file</font>
 <font color="#208020"># @param  data        Updated data</font>
 <font color="#208020"># @return Void. Side-effect: write data to tracker file</font>
-<strong><a name="writeTracker_401">proc <a href="tackle.tcl-annot.html#writeTracker">writeTracker</a></a></strong><a name="writeTracker"></a> {trackerFile data} {
+<strong><a name="writeTracker_405">proc <a href="tackle.tcl-annot.html#writeTracker">writeTracker</a></a></strong><a name="writeTracker"></a> {trackerFile data} {
     set channel [open $trackerFile w+]
     puts -nonewline $channel $data
     close $channel
@@ -425,7 +429,7 @@ namespace eval ::termColor {
 <font color="#208020"># @param  trackerFile Path to the tacker.tackle file</font>
 <font color="#208020"># @param  body        Operations to perform with tracker data</font>
 <font color="#208020"># @return Void. Side-effect: preform body and write tracker data</font>
-<strong><a name="withTracker_412">proc <a href="tackle.tcl-annot.html#withTracker">withTracker</a></a></strong><a name="withTracker"></a> {trackerFile body} {
+<strong><a name="withTracker_416">proc <a href="tackle.tcl-annot.html#withTracker">withTracker</a></a></strong><a name="withTracker"></a> {trackerFile body} {
     try {
         set tracker [<a name="readTracker(1)"><a href="./tackle.tcl.html#readTracker_388">readTracker</a></a> $trackerFile]
     } on error msg {
@@ -436,7 +440,7 @@ namespace eval ::termColor {
     eval $body
     
     try {
-        <a name="writeTracker(1)"><a href="./tackle.tcl.html#writeTracker_401">writeTracker</a></a> $trackerFile $tracker
+        <a name="writeTracker(1)"><a href="./tackle.tcl.html#writeTracker_405">writeTracker</a></a> $trackerFile $tracker
     } on error msg {
         puts &quot;[::termColor::red Error:] could not write tracker file.&quot;
         exit 1
@@ -481,9 +485,6 @@ set arguments   [lrange $argv 1 end]
 set tacklepath  [file join $::env(HOME) .local share tackle]
 set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
 
-<font color="#208020"># Create tracker file if it does not already exist.</font>
-close [open $trackerFile a]
-
 <font color="#208020"># We don't need network or file modfication to check local state.</font>
 if {$command eq &quot;ls&quot; || $command eq &quot;show&quot;} {
     try {
@@ -515,7 +516,7 @@ if {$command eq &quot;search&quot; || $command eq &quot;add&quot;} {
         exit 1
     }
 
-    <a name="withTracker(1)"><a href="./tackle.tcl.html#withTracker_412">withTracker</a></a> $trackerFile {
+    <a name="withTracker(1)"><a href="./tackle.tcl.html#withTracker_416">withTracker</a></a> $trackerFile {
         upvar command cmd index ind arguments args
         try {
             set tracker [$cmd $ind $tracker $args]
@@ -531,7 +532,7 @@ if {$command eq &quot;search&quot; || $command eq &quot;add&quot;} {
 
 <font color="#208020"># Removing packages requires tracker data.</font>
 if {$command eq &quot;rm&quot;} {
-    <a name="withTracker(2)"><a href="./tackle.tcl.html#withTracker_412">withTracker</a></a> $trackerFile {
+    <a name="withTracker(2)"><a href="./tackle.tcl.html#withTracker_416">withTracker</a></a> $trackerFile {
         upvar command cmd arguments args
         try {
             set tracker [$cmd $tracker $args]
@@ -554,7 +555,7 @@ puts $helpMessage
 <a href="index_main.html#byprocname">procedure name</a> |
 <a href="index_main.html#bycall">procedure call</a> |
 <a href="index_annot_full.html">annotation</a><br>
-<cite>Index generated 2021-11-13 at 23:07.</cite>
+<cite>Index generated 2021-11-13 at 23:36.</cite>
 </font>
 </body>
 </html>

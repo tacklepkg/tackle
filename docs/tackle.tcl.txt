@@ -386,6 +386,10 @@ proc hasFlags {args flags} {
 # @param  trackerFile Path to the tacker.tackle file
 # @return Contents of the file
 proc readTracker trackerFile {
+    # Create tracker file if it does not already exist.
+    file mkdir [file root $trackerFile]
+    close [open $trackerFile a]
+
     set channel [open $trackerFile r]
     set data    [read $channel]
     close $channel
@@ -464,9 +468,6 @@ set command     [lindex $argv 0]
 set arguments   [lrange $argv 1 end]
 set tacklepath  [file join $::env(HOME) .local share tackle]
 set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
-
-# Create tracker file if it does not already exist.
-close [open $trackerFile a]
 
 # We don't need network or file modfication to check local state.
 if {$command eq "ls" || $command eq "show"} {

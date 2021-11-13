@@ -2,6 +2,8 @@
 
 <p>A package manager for the Tcl programming language.</p>
 
+<p><a href="https://github.com/tacklepkg/tackle/actions/workflows/makefile.yml"><img src="https://github.com/tacklepkg/tackle/actions/workflows/makefile.yml/badge.svg" alt="Makefile CI"/></a></p>
+
 <p>For more information, API documenation, etc., please visit:
 <a href="https://www.tacklepkg.com">tacklepkg.com</a></p>
 
@@ -75,9 +77,10 @@ $ set -Ux TCL8_6_TM_PATH $TCL8_6_TM_PATH ~/.local/share/tackle/</code></li>
 
 <h2>Contributing</h2>
 
-<p>In order to build Tackle you need Tcl 8.6, Expect, and Make installed.</p>
+<p>In order to build Tackle you need Tcl 8.6+, Expect, and Make installed.</p>
 
-<p><code>$ make install</code> will test the code, generate documentation, and
-bundle dependencies.</p>
+<p>A simple <code>$ make</code> will bundle dependencies, generate documentation,
+and run the test suite. <code>$ make install</code> marks the bundle as executable
+and installs it to <code>~/.local/bin/tackle</code>.</p>
 
 <p>Help improve Tackle on <a href="https://github.com/tacklepkg/tackle">GitHub</a>.</p>
