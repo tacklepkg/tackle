@@ -165,11 +165,13 @@ namespace eval ::termColor {
     # Make green bold text
     #
     # @param  str  String to be colored
+    # @return String with proper escape codes
     proc green str {highlight "1;32m" $str}
 
     # Make yellow bold text
     #
     # @param  str  String to be colored
+    # @return String with proper escape codes
     proc yellow str {highlight "1;33m" $str}
 }
 
