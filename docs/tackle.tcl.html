@@ -1,0 +1,420 @@
+<html>
+<head><title>tackle.tcl</title></head>
+<body bgcolor="#ffffff">
+Tackle package manager API documentation
+<hr>
+<font size="-2">
+<a href="overview.html">Overview</a> | Index by:  <a href="index_main.html#tackle.tcl">file name</a> |
+<a href="index_main.html#byprocname">procedure name</a> |
+<a href="index_main.html#bycall">procedure call</a> |
+<a href="index_annot_full.html">annotation</a>
+</font>
+<hr>
+<strong>tackle.tcl</strong>
+(<a href="tackle.tcl-annot.html">annotations</a> | <a href="tackle.tcl.txt">original source</a>)
+<p>
+<pre>
+<font color="#208020">#//#</font>
+<font color="#208020"># Tackle is a package manager for the Tcl programming language.</font>
+<font color="#208020"># This file provides a command-line interface, e.g.:</font>
+<font color="#208020"># &lt;pre&gt;</font>
+<font color="#208020">#   $ tackle ls</font>
+<font color="#208020">#   tustack</font>
+<font color="#208020">#   tcllib</font>
+<font color="#208020">#   tcltls</font>
+<font color="#208020">#   $ tackle rm tutstack</font>
+<font color="#208020">#   Removed tutstack.</font>
+<font color="#208020">#   $ tackle ls</font>
+<font color="#208020">#   tcllib</font>
+<font color="#208020">#   tcltls</font>
+<font color="#208020"># &lt;/pre&gt;</font>
+<font color="#208020">#</font>
+<font color="#208020"># @author    nat-418</font>
+<font color="#208020"># @version   0.0.6</font>
+<font color="#208020"># @see       https://www.github.com/tacklepkg/tackle</font>
+<font color="#208020">#//#</font>
+package require http
+package require tls
+
+<font color="#208020"># We begin by inlining a few dependencies</font>
+<font color="#208020"># =======================================</font>
+
+namespace eval ::targz {
+    package require tar
+    package require zlib
+    namespace export unpack
+
+    <font color="#208020"># Unpacks a gzipped tarball</font>
+    <font color="#208020">#</font>
+    <font color="#208020"># @param  targz       Path to some file.tar.gz</font>
+    <font color="#208020"># @param  destination Path to an output directory for the archive contents</font>
+    <font color="#208020"># @return Path to the unarchived destination directory</font>
+    <strong><a name="unpack_36">proc <a href="tackle.tcl-annot.html#unpack">unpack</a></a></strong><a name="unpack"></a> {targz destination} {
+        try {
+            set unpacked  [lindex [exec tar -xvzf $targz] 0]
+            set directory [file join $destination $unpacked]
+
+            file rename $unpacked $directory
+            file delete -force $targz
+
+            return $directory
+        } on error msg {
+            puts &quot;System tar not available, falling back to slow tar...&quot;
+            puts $msg
+        }
+
+        set tar [file rootname $targz]
+
+        try {
+            set chan1 [open $targz rb]
+            zlib push gunzip $chan1 
+            set contents [read $chan1]
+            close $chan1
+        } on error msg {
+            puts &quot;[redText Error:] Failed to decompress tarball: $targz.&quot;
+            exit 1
+        }
+        
+        try {
+            set chan2 [open $tar wb]
+            puts -nonewline $chan2 $contents
+            close $chan2
+        } on error msg {
+            puts &quot;[::termColor::red Error:] Failed to write archive: $tar.&quot;
+            exit 1
+        }
+        
+        set contents    [::tar::contents $tar]
+        set directory   [file root $tar]
+
+        set files [lmap path $contents {file tail $path}]
+
+        foreach path $contents {
+            try {
+                if {[string index $path end] eq &quot;/&quot;} {
+                    file mkdir [file join $destination $path]
+                } else {
+                    file mkdir [file normalize [file join $destination [file dirname $path]]]
+                    set chan3 [open [file join $destination $path] wb]
+                    puts -nonewline $chan3 [::tar::get $tar $path]
+                    close $chan3
+                }
+            } on error msg {
+                puts &quot;Failed to unarchive $path.&quot;
+            }
+        }
+
+        file delete $targz
+        file delete $tar
+
+        return $directory
+    }
+}
+
+namespace eval ::httpRedirects {
+    package require http
+    package require uri
+
+    namespace export geturl
+
+    <font color="#208020"># GETs through HTTP redirects</font>
+    <font color="#208020">#</font>
+    <font color="#208020"># @param  url  URL target for the HTTP request</font>
+    <font color="#208020"># @param  args Options to pass to ::http::geturl</font>
+    <font color="#208020"># @return Token representing the respons to the request</font>
+    <font color="#208020"># @see    https://www.tcl.tk/man/tcl/TclCmd/http.html#M17</font>
+    <strong><a name="geturl_110">proc <a href="tackle.tcl-annot.html#geturl">geturl</a></a></strong><a name="geturl"></a> {url args} {
+        array set URI [::uri::split $url]
+        for {set i 0} {$i &lt; 5} {incr i} {
+            set token [::http::geturl $url {*}$args]
+
+            if {![string match {30[1237]} [::http::ncode $token]]} {
+                return $token
+             }
+
+            array set meta [string tolower [set ${token}(meta)]]
+
+            if {![info exist meta(location)]} {
+                return $token
+            }
+
+            array set uri [::uri::split $meta(location)]
+
+            unset meta
+
+            if {$uri(host) eq {}} {set uri(host) $URI(host)}
+
+            <font color="#208020"># problem w/ relative versus absolute paths</font>
+            set url [::uri::join {*}[array get uri]]
+        }
+    }
+}
+
+namespace eval ::termColor {
+    namespace export bright red green yellow
+
+    <font color="#208020"># Apply ANSI bold color escape sequences to a string and then reset.</font>
+    <font color="#208020">#</font>
+    <font color="#208020"># @param  code Color code</font>
+    <font color="#208020"># @param  str  String to be colored</font>
+    <font color="#208020"># @return String with proper escape codes</font>
+    <font color="#208020"># @see    https://en.wikipedia.org/wiki/ANSI_escape_code</font>
+    <strong><a name="highlight_146">proc <a href="tackle.tcl-annot.html#highlight">highlight</a></a></strong><a name="highlight"></a> {code str} {
+        append result &quot;\033\[$code&quot;;
+        append result $str
+        append result &quot;\033\[0m&quot;;
+
+        return $result
+    }
+
+    <strong><a name="bright_154">proc <a href="tackle.tcl-annot.html#bright">bright</a></a></strong><a name="bright"></a> str {<a name="highlight(1)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;29m&quot; $str}
+    <strong><a name="red_155">proc <a href="tackle.tcl-annot.html#red">red</a></a></strong><a name="red"></a>    str {<a name="highlight(2)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;31m&quot; $str}
+    <strong><a name="green_156">proc <a href="tackle.tcl-annot.html#green">green</a></a></strong><a name="green"></a>  str {<a name="highlight(3)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;32m&quot; $str}
+    <strong><a name="yellow_157">proc <a href="tackle.tcl-annot.html#yellow">yellow</a></a></strong><a name="yellow"></a> str {<a name="highlight(4)"><a href="./tackle.tcl.html#highlight_146">highlight</a></a> &quot;1;33m&quot; $str}
+}
+
+<font color="#208020"># Here we define the procedures of Tackle proper</font>
+<font color="#208020"># =============================================</font>
+
+<font color="#208020"># Helper function to perform a GET request. Throws if response is not 200 OK.</font>
+<font color="#208020">#</font>
+<font color="#208020"># @param  url  URL target for the HTTP request</font>
+<font color="#208020"># @return Body of the HTTP response</font>
+<strong><a name="fetch_167">proc <a href="tackle.tcl-annot.html#fetch">fetch</a></a></strong><a name="fetch"></a> url {
+    set token [::httpRedirects::geturl $url]
+    set code  [::http::ncode $token]
+    set data  [::http::data $token]
+
+    if {$code ne 200} {
+        error &quot;HTTP request for $url failed.&quot;
+    }
+
+    return $data
+}
+
+<font color="#208020"># Search package index for a given package name</font>
+<font color="#208020">#</font>
+<font color="#208020"># @param  index   Dictionary of installable packages</font>
+<font color="#208020"># @param  tracker Dictionary of installed packages</font>
+<font color="#208020"># @param  query   String of what package we are looking for</font>
+<font color="#208020"># @return Void: side-effect is to print search results</font>
+<strong><a name="search_185">proc <a href="tackle.tcl-annot.html#search">search</a></a></strong><a name="search"></a> {index tracker {query &quot;&quot;}} {
+    try {
+        set names [dict keys $index]
+    } on error msg {
+        puts &quot;[::termColor::red Error:] malformed package index.&quot;
+    }
+
+    foreach name [lsearch -inline -all $names $query*] {
+        dict with index $name {
+            if {$type eq &quot;module&quot;} {
+                set hiName [::termColor::yellow $name]
+            } else {
+                set hiName [::termColor::green $name]
+            }
+            puts &quot;$hiName [::termColor::bright v$version]&quot;
+            puts &quot;  $description&quot;
+            puts &quot;  [string totitle $type] URL: $url&quot;
+            puts &quot;&quot;
+        }
+    }
+
+    exit
+}
+
+<font color="#208020"># Add (i.e. install) packages</font>
+<font color="#208020">#</font>
+<font color="#208020"># @param  index   Dictionary of installable packages</font>
+<font color="#208020"># @param  tracker Dictionary of installed packages</font>
+<font color="#208020"># @param  names   List of package names to install</font>
+<font color="#208020"># @return         Updated dictionary of installed packages</font>
+<strong><a name="add_215">proc <a href="tackle.tcl-annot.html#add">add</a></a></strong><a name="add"></a> {index tracker names} {
+    upvar tacklepath destination
+
+    set installed      [dict keys $tracker]
+    set updatedTracker $tracker
+
+    foreach name $names {
+        if {$name in $installed || [file isdirectory $name]} {
+            puts &quot;$name is already installed, skipping...&quot;
+            continue
+        }
+
+        dict set updatedTracker $name [dict get $index $name]
+
+        dict with index $name {
+            file mkdir $destination
+             
+            set payload  [<a name="fetch(1)"><a href="./tackle.tcl.html#fetch_167">fetch</a></a> $url]
+            set filename [file join $destination [file tail $url]]
+
+            set channel [open $filename wb]
+            puts -nonewline $channel $payload
+            close $channel
+
+            if {$type eq &quot;package&quot;} {
+                set unpacked [::targz::unpack $filename $destination]
+                dict set updatedTracker $name path $unpacked
+            } else {
+                dict set updatedTracker $name path $filename
+            }
+            
+            if {[info exists setup]} {
+                exec sh -c [subst $setup]
+            }
+
+            puts &quot;Added $type $name v$version&quot;
+            puts &quot;from $url&quot;
+            puts &quot;to $unpacked&quot;
+        }
+    }
+
+    return $updatedTracker
+}
+
+<font color="#208020"># Remove (i.e. uninstall) packages</font>
+<font color="#208020">#</font>
+<font color="#208020"># @param  tracker Dictionary of installed packages</font>
+<font color="#208020"># @param  names   List of package names to uninstall</font>
+<font color="#208020"># @return Updated dictionary of installed packages</font>
+<strong><a name="rm_264">proc <a href="tackle.tcl-annot.html#rm">rm</a></a></strong><a name="rm"></a> {tracker names} {
+    upvar tacklepath destination
+
+    set installed      [dict keys $tracker]
+    set updatedTracker $tracker
+
+    foreach name $names {
+        try {
+            set path [dict get $tracker $name path]
+        } on error msg {
+            puts &quot;$name is not installed, skipping...&quot;
+            continue
+        }
+
+        if {$name in $installed &amp;&amp; [file isdirectory $path]} {
+            try {
+                set updatedTracker [dict remove $updatedTracker $name]
+                file delete -force $path
+            } on error msg {
+                puts &quot;[::termColor::red Error:] failed to remove $name.&quot;
+                exit 1
+            } finally {
+                puts &quot;Removed $name.&quot;
+            }
+        } else {
+            puts &quot;[::termColor::red Error:] tracker out of sync with packages.&quot;
+            exit 1
+        }
+    }
+    
+    return $updatedTracker
+}
+
+<font color="#208020"># List installed packages</font>
+<font color="#208020">#</font>
+<font color="#208020"># @param  tracker Dictionary of installed packages</font>
+<font color="#208020"># @param  pattern Glob-style pattern of package names</font>
+<font color="#208020"># @return Void: side-effect is to print package names to the console.</font>
+<strong><a name="ls_302">proc <a href="tackle.tcl-annot.html#ls">ls</a></a></strong><a name="ls"></a> {tracker pattern} {
+    set names [dict keys $tracker]
+
+    if {$names eq &quot;&quot;} exit
+
+    puts [string map {&quot; &quot; \n} [lsearch -inline -all $names $pattern*]]
+
+    exit
+}
+
+<font color="#208020"># Show details of an installed package</font>
+<font color="#208020">#</font>
+<font color="#208020"># @param  tracker Dictionary of installed packages</font>
+<font color="#208020"># @param  name    Name of a pattern to detail</font>
+<font color="#208020"># @return Void: side-effect is to print package details to the console.</font>
+<strong><a name="show_317">proc <a href="tackle.tcl-annot.html#show">show</a></a></strong><a name="show"></a> {tracker name} {
+    try {
+        set names [dict keys $tracker]
+    } on error msg {
+        puts &quot;[::termColor::red Error:] malformed package tracker.&quot;
+    }
+
+    try {
+        dict with tracker $name {
+            if {$type eq &quot;module&quot;} {
+                set hiName [::termColor::yellow $name]
+            } else {
+                set hiName [::termColor::green $name]
+            }
+            puts &quot;$hiName [::termColor::bright v$version]&quot;
+            puts &quot;  $description&quot;
+            puts &quot;  [string totitle $type] URL: $url&quot;
+            puts &quot;  Path: $path&quot;
+            puts &quot;&quot;
+        }
+    } on error msg {
+        puts &quot;[::termColor::red Error:] $name is not installed.&quot;
+    }
+
+    exit
+}
+
+<font color="#208020"># Below we handle user input, execute commands, etc.</font>
+<font color="#208020"># ==================================================</font>
+
+<font color="#208020"># Do nothing by default</font>
+if {$argc eq 0} {
+    puts &quot;[::termColor::red Error:] no input given.&quot;
+    exit 1
+}
+
+set command     [lindex $argv 0]
+set arguments   [lrange $argv 1 end]
+set tacklepath  [file join $::env(HOME) .local share tackle]
+set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
+
+<font color="#208020"># Create tracker file if it does not already exist.</font>
+close [open $trackerFile a]
+
+<font color="#208020"># Get the record of what is installed</font>
+set channel [open $trackerFile r]
+set tracker [read $channel]
+close $channel
+
+<font color="#208020"># We don't need network or file modfication to check local state.</font>
+if {$command eq &quot;ls&quot; || $command eq &quot;show&quot;} {
+    $command $tracker $arguments
+    exit
+}
+
+<font color="#208020"># Only search and add need to check the network.</font>
+if {$command eq &quot;search&quot; || $command eq &quot;add&quot;} {
+    try {
+        <font color="#208020"># Support HTTPS or HTTP requests</font>
+        ::http::register https 443 [list ::tls::socket -tls1 1]
+
+        <font color="#208020"># Get the latest available packages</font>
+        set index [<a name="fetch(2)"><a href="./tackle.tcl.html#fetch_167">fetch</a></a> \
+            https://raw.githubusercontent.com/tacklepkg/packages/master/index.tackle]
+    } on error msg {
+        puts &quot;[::termColor::red Error:] could not fetch package index.&quot;
+        exit 1
+    }
+    set tracker [$command $index $tracker $arguments]
+} else {
+    set tracker [$command $tracker $arguments]
+}
+
+<font color="#208020"># Update our record of what is installed</font>
+set channel2 [open $trackerFile w+]
+puts -nonewline $channel2 $tracker
+close $channel2
+</pre>
+<hr>
+<font size="-2">
+<a href="overview.html">Overview</a> | Index by:  <a href="index_main.html#byfilename">file name</a> |
+<a href="index_main.html#byprocname">procedure name</a> |
+<a href="index_main.html#bycall">procedure call</a> |
+<a href="index_annot_full.html">annotation</a><br>
+<cite>Index generated 2021-11-13 at 14:45.</cite>
+</font>
+</body>
+</html>

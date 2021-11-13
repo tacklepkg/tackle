@@ -1,0 +1,18 @@
+[user]
+  name = nat-418
+  email = 93013864+nat-418@users.noreply.github.com
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = git@github.com:tacklepkg/tackle
+	fetch = +refs/heads/*:refs/remotes/origin/*
+	gh-resolved = base
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[branch "alpha-release"]
+	remote = origin
+	merge = refs/heads/alpha-release

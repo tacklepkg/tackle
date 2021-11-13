@@ -1,0 +1,248 @@
+<html>
+<head><title>tackle.tcl annotations</title></head>
+<body bgcolor="#ffffff">
+Tackle package manager API documentation
+<hr>
+<font size="-2">
+<a href="overview.html">Overview</a> | Index by:  <a href="index_main.html#tackle.tcl">file name</a> |
+<a href="index_main.html#byprocname">procedure name</a> |
+<a href="index_main.html#bycall">procedure call</a> |
+<a href="index_annot_full.html">annotation</a>
+</font>
+<hr>
+<h2><a href="tackle.tcl.html">tackle.tcl</a> Annotations</h2>
+Created from <strong><code>src/tackle.tcl</strong></code>
+<hr>
+<dl>
+<dd>Tackle is a package manager for the Tcl programming language.
+ This file provides a command-line interface, e.g.:
+ <pre>
+   $ tackle ls
+   tustack
+   tcllib
+   tcltls
+   $ tackle rm tutstack
+   Removed tutstack.
+   $ tackle ls
+   tcllib
+   tcltls
+ </pre>
+<dl>
+<dt><strong>Version:</strong> <dd>0.0.6
+<dt><strong>Author:</strong> <dd>nat-418
+<dt><strong>See Also:</strong> <dd><a href="https://www.github.com/tacklepkg/tackle">https://www.github.com/tacklepkg/tackle</a>
+</dl></dl>
+<hr>
+
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+<tr bgcolor="#ccccff">
+<!-- -------------------- PROCEDURE SUMMARY -------------------- -->
+<td><font size="+2"><strong><a name="proc_summary">Procedure Summary</a></strong></font></td>
+</tr>
+<tr><td><code><a href="#add">add</a> { index tracker names }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add</td></tr>
+<tr><td><code><a href="#bright">bright</a> { str }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+<tr><td><code><a href="#fetch">fetch</a> { url }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Helper function to perform a GET request.</td></tr>
+<tr><td><code><a href="#geturl">geturl</a> { url args }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GETs through HTTP</td></tr>
+<tr><td><code><a href="#green">green</a> { str }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+<tr><td><code><a href="#highlight">highlight</a> { code str }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Apply ANSI bold color escape sequences to a string and then</td></tr>
+<tr><td><code><a href="#ls">ls</a> { tracker pattern }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List installed</td></tr>
+<tr><td><code><a href="#red">red</a> { str }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+<tr><td><code><a href="#rm">rm</a> { tracker names }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove</td></tr>
+<tr><td><code><a href="#search">search</a> { index tracker {query {}} }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Search package index for a given package</td></tr>
+<tr><td><code><a href="#show">show</a> { tracker name }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show details of an installed</td></tr>
+<tr><td><code><a href="#unpack">unpack</a> { targz destination }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Unpacks a gzipped</td></tr>
+<tr><td><code><a href="#yellow">yellow</a> { str }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>
+</table>
+<p>
+<!-- -------------------- PROCEDURE DETAIL -------------------- -->
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+<tr bgcolor="#ccccff">
+<td colspan=1><font size="+2"><strong><a name="proc_detail">Procedure Detail</a></strong></font></td>
+</tr>
+</table>
+<h3><a name="add">add</a></h3>
+<pre>proc add { index tracker names }</pre>
+<dl>
+<dd>Add (i.e. install) packages<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>index</code> - Dictionary of installable packages
+ 
+<dd><code>tracker</code> - Dictionary of installed packages
+ 
+<dd><code>names</code> - List of package names to install
+<dt><strong>Returns:</strong>
+<dd> Updated dictionary of installed packages
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#add_215">tackle.tcl, line 215</a>
+</dl></dl>
+
+<hr>
+<h3><a name="bright">bright</a></h3>
+<pre>proc bright { str }</pre>
+<dl>
+<dd><dl>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#bright_154">tackle.tcl, line 154</a>
+</dl></dl>
+
+<hr>
+<h3><a name="fetch">fetch</a></h3>
+<pre>proc fetch { url }</pre>
+<dl>
+<dd>Helper function to perform a GET request. Throws if response is not 200 OK.<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>url</code> - URL target for the HTTP request
+<dt><strong>Returns:</strong>
+<dd> Body of the HTTP response
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#fetch_167">tackle.tcl, line 167</a>
+</dl></dl>
+
+<hr>
+<h3><a name="geturl">geturl</a></h3>
+<pre>proc geturl { url args }</pre>
+<dl>
+<dd>GETs through HTTP redirects<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>url</code> - URL target for the HTTP request
+ 
+<dd><code>args</code> - Options to pass to ::http::geturl
+<dt><strong>Returns:</strong>
+<dd> Token representing the respons to the request
+<dt><strong>See Also:</strong>
+<dd><a href="https://www.tcl.tk/man/tcl/TclCmd/http.html#M17">https://www.tcl.tk/man/tcl/TclCmd/http.html#M17</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#geturl_110">tackle.tcl, line 110</a>
+</dl></dl>
+
+<hr>
+<h3><a name="green">green</a></h3>
+<pre>proc green { str }</pre>
+<dl>
+<dd><dl>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#green_156">tackle.tcl, line 156</a>
+</dl></dl>
+
+<hr>
+<h3><a name="highlight">highlight</a></h3>
+<pre>proc highlight { code str }</pre>
+<dl>
+<dd>Apply ANSI bold color escape sequences to a string and then reset.<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>code</code> - Color code
+ 
+<dd><code>str</code> - String to be colored
+<dt><strong>Returns:</strong>
+<dd> String with proper escape codes
+<dt><strong>See Also:</strong>
+<dd><a href="https://en.wikipedia.org/wiki/ANSI_escape_code">https://en.wikipedia.org/wiki/ANSI_escape_code</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#highlight_146">tackle.tcl, line 146</a>
+</dl></dl>
+
+<hr>
+<h3><a name="ls">ls</a></h3>
+<pre>proc ls { tracker pattern }</pre>
+<dl>
+<dd>List installed packages<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>tracker</code> - Dictionary of installed packages
+ 
+<dd><code>pattern</code> - Glob-style pattern of package names
+<dt><strong>Returns:</strong>
+<dd> Void: side-effect is to print package names to the console.
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#ls_302">tackle.tcl, line 302</a>
+</dl></dl>
+
+<hr>
+<h3><a name="red">red</a></h3>
+<pre>proc red { str }</pre>
+<dl>
+<dd><dl>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#red_155">tackle.tcl, line 155</a>
+</dl></dl>
+
+<hr>
+<h3><a name="rm">rm</a></h3>
+<pre>proc rm { tracker names }</pre>
+<dl>
+<dd>Remove (i.e. uninstall) packages<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>tracker</code> - Dictionary of installed packages
+ 
+<dd><code>names</code> - List of package names to uninstall
+<dt><strong>Returns:</strong>
+<dd> Updated dictionary of installed packages
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#rm_264">tackle.tcl, line 264</a>
+</dl></dl>
+
+<hr>
+<h3><a name="search">search</a></h3>
+<pre>proc search { index tracker {query {}} }</pre>
+<dl>
+<dd>Search package index for a given package name<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>index</code> - Dictionary of installable packages
+ 
+<dd><code>tracker</code> - Dictionary of installed packages
+ 
+<dd><code>query</code> - String of what package we are looking for
+<dt><strong>Returns:</strong>
+<dd> Void: side-effect is to print search results
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#search_185">tackle.tcl, line 185</a>
+</dl></dl>
+
+<hr>
+<h3><a name="show">show</a></h3>
+<pre>proc show { tracker name }</pre>
+<dl>
+<dd>Show details of an installed package<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>tracker</code> - Dictionary of installed packages
+ 
+<dd><code>name</code> - Name of a pattern to detail
+<dt><strong>Returns:</strong>
+<dd> Void: side-effect is to print package details to the console.
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#show_317">tackle.tcl, line 317</a>
+</dl></dl>
+
+<hr>
+<h3><a name="unpack">unpack</a></h3>
+<pre>proc unpack { targz destination }</pre>
+<dl>
+<dd>Unpacks a gzipped tarball<dl>
+<dt><strong>Parameters:</strong>
+<dd><code>targz</code> - Path to some file.tar.gz
+ 
+<dd><code>destination</code> - Path to an output directory for the archive contents
+<dt><strong>Returns:</strong>
+<dd> Path to the unarchived destination directory
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#unpack_36">tackle.tcl, line 36</a>
+</dl></dl>
+
+<hr>
+<h3><a name="yellow">yellow</a></h3>
+<pre>proc yellow { str }</pre>
+<dl>
+<dd><dl>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#yellow_157">tackle.tcl, line 157</a>
+</dl></dl>
+
+<hr>
+<font size="-2">
+<a href="overview.html">Overview</a> | Index by:  <a href="index_main.html#byfilename">file name</a> |
+<a href="index_main.html#byprocname">procedure name</a> |
+<a href="index_main.html#bycall">procedure call</a> |
+<a href="index_annot_full.html">annotation</a><br>
+<cite>Index generated 2021-11-13 at 14:45.</cite>
+</font>
+</body>
+</html>

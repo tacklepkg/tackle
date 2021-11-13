@@ -1,0 +1,74 @@
+<h1>Tackle</h1>
+
+<p>A package manager for the Tcl programming language.</p>
+
+<p>For more information, API documenation, etc., please visit:
+<a href="https://www.tacklepkg.com">tacklepkg.com</a></p>
+
+<h2>Synopsis</h2>
+
+<p>Packages are
+<a href="https://www.tcl.tk/man/tcl8.5/tutorial/Tcl31.html">pretty straightforward</a>
+in Tcl, but manually moving around directories is a bit of a pain.
+Tackle helps automate this process by managing directories of packages and
+modules.</p>
+
+<table class="table">
+<thead>
+  <tr>
+    <th>command</th>
+    <th>description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>$ tackle package search $query</code></td>
+    <td>Search for available packages by <code>$query</code></td>
+  </tr>
+  <tr>
+    <td><code>$ tackle package add $names</code></td>
+    <td>Install packages by <code>$names</code></td>
+  </tr>
+  <tr>
+    <td><code>$ tackle package rm  $names</code></td>
+    <td>Uninstall packages by <code>$names</code></td>
+  </tr>
+  <tr>
+    <td><code>$ tackle package ls</code></td>
+    <td>List installed packages</td>
+  </tr>
+  <tr>
+    <td><code>$ tackle package show $name</code></td>
+    <td>Detail an installed package by <code>$name</code></td>
+  </tr>
+</tbody>
+</table>
+
+
+<h2>Usage</h2>
+
+<p>Tackle works by fetching Tcl package tarballs or module files from the web.
+One can add or remove packages like this:</p>
+
+<pre class='code'><code class='bash'>$ tackle add tutstack
+Fetching tutstack from https://api.github.com/repos/tacklepkg/tutstack/tarball/v1.0.0...
+Installing tutstack to /home/username/.local/share/tackle/tutstack...
+Done.
+$ tackle ls
+tutstack</code></pre>
+
+<h2>Installation</h2>
+
+<ol>
+<li>Make sure you have Tcl version 8.6 or greater installed.</li>
+<li>Set environment variables, e.g. for Fish shell:
+<code>fish
+$ set -Ux TCLLIBPATH $TCLLIBPATH ~/.local/share/tackle/
+$ set -Ux TCL8_6_TM_PATH $TCL8_6_TM_PATH ~/.local/share/tackle/</code></li>
+<li>Download the <code>tackle</code> script and place it somewhere in your <code>$PATH</code>.
+   Alternatively, clone this repository and <code>$ make install</code>.
+</li></ol>
+
+<h2>Contributing</h2>
+
+<p>Help improve Tackle on <a href="https://github.com/tacklepkg/tackle">GitHub</a>.</p>
