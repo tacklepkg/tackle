@@ -1,5 +1,4 @@
 default:
-	expect test.tcl
 	mkdir -p tmp
 	rm -rf docs
 	tclsh ./lib/md2html.tcl README.md tmp/overview.html
@@ -13,6 +12,7 @@ default:
 	cd tmp; tclsh ../lib/tpack.tcl wrap tackle.tapp
 	cp tmp/tackle.tapp bin/tackle
 	rm -rf tmp
+	expect test.tcl
 
 install: default
 	chmod +x bin/tackle
