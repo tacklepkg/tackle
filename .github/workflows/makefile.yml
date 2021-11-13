@@ -13,9 +13,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt install tcllib
       
-    - name: Build
+    - name: Make
       run: make
       
-    - name: Install
+    - name: Make Install
       run: make install

@@ -1,5 +1,3 @@
-set auto_path ../src/tackle.vfs/lib/
-
 package require Tcl 8.5
 package require Markdown
 package require textutil
