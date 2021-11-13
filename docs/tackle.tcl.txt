@@ -3,15 +3,8 @@
 # This file provides a command-line interface, e.g.:
 # <pre>
 #   $ tackle ls
-#   tustack
 #   tcllib
-#   tcltls
-#   $ tackle rm tutstack
-#   Removed tutstack.
-#   $ tackle ls
-#   tcllib
-#   tcltls
-# </pre>
+# </pre
 #
 # @author    nat-418
 # @version   0.0.6
@@ -26,6 +19,7 @@ set version 0.0.6
 # We begin by inlining a few dependencies
 # =======================================
 
+# tar -xzf
 namespace eval ::targz {
     package require tar
     package require zlib
@@ -98,6 +92,7 @@ namespace eval ::targz {
     }
 }
 
+# Wrapper for ::http::geturl
 namespace eval ::httpRedirects {
     package require http
     package require uri
@@ -137,6 +132,7 @@ namespace eval ::httpRedirects {
     }
 }
 
+# Pretty colors in the console
 namespace eval ::termColor {
     namespace export bright red green yellow
 
@@ -154,14 +150,31 @@ namespace eval ::termColor {
         return $result
     }
 
+    # Make bright bold text
+    #
+    # @param  str  String to be colored
+    # @return String with proper escape codes
     proc bright str {highlight "1;29m" $str}
-    proc red    str {highlight "1;31m" $str}
-    proc green  str {highlight "1;32m" $str}
+
+    # Make red bold text
+    #
+    # @param  str  String to be colored
+    # @return String with proper escape codes
+    proc red str {highlight "1;31m" $str}
+
+    # Make green bold text
+    #
+    # @param  str  String to be colored
+    proc green str {highlight "1;32m" $str}
+
+    # Make yellow bold text
+    #
+    # @param  str  String to be colored
     proc yellow str {highlight "1;33m" $str}
 }
 
 # Here we define the procedures of Tackle proper
-# =============================================
+# ==============================================
 
 # Helper function to perform a GET request. Throws if response is not 200 OK.
 #
@@ -498,6 +511,7 @@ if {$command eq "search" || $command eq "add"} {
     exit
 }
 
+# Removing packages requires tracker data.
 if {$command eq "rm"} {
     withTracker $trackerFile {
         upvar command cmd arguments args
@@ -513,4 +527,5 @@ if {$command eq "rm"} {
     exit
 }
 
+# If you somehow get here you surely need help!
 puts $helpMessage
