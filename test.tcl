@@ -2,6 +2,7 @@
 log_user 1
 
 # begin with a clean slate
+set preinstalled false
 spawn ./bin/tackle ls tutstack
 expect {
     "tutstack" {
