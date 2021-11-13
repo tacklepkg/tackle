@@ -1,4 +1,5 @@
 default:
+	expect test.tcl
 	mkdir -p tmp
 	rm -rf docs
 	tclsh ./lib/md2html.tcl README.md tmp/overview.html
