@@ -1,5 +1,5 @@
 #!/usr/bin/env expect
-log_user 0
+log_user 1
 
 # begin with a clean slate
 spawn ./bin/tackle ls tutstack
