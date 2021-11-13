@@ -7,14 +7,14 @@
 # </pre
 #
 # @author    nat-418
-# @version   0.0.6
+# @version   0.0.7
 # @see       https://www.github.com/tacklepkg/tackle
 #//#
 package require http
 package require tls
 package require textutil
 
-set version 0.0.6
+set version 0.0.7
 
 # We begin by inlining a few dependencies
 # =======================================
