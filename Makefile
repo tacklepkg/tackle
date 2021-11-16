@@ -7,15 +7,15 @@ default:
 		--overview tmp/overview.html \
 		--header 'Tackle package manager API documentation' \
 		docs \
-		src/tackle.tcl
-	cp -r src/* tmp
+		./src/tackle.tcl
+	cp -r ./src/* tmp
 	cd tmp; tclsh ../lib/tpack.tcl wrap tackle.tapp
-	cp tmp/tackle.tapp bin/tackle
+	cp tmp/tackle.tapp ./bin/tackle
+	cd tmp; date > test.log
+	cd tmp; TACKLEPATH="$PWD" expect ../test.exp ../bin/tackle
 	rm -rf tmp
-	date > test.log
-	expect test.exp
 
 install: default
-	chmod +x bin/tackle
+	chmod +x ./bin/tackle
 	mkdir -p ~/.local/bin
-	cp bin/tackle ~/.local/bin/tackle
+	cp ./bin/tackle ~/.local/bin/tackle

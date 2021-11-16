@@ -1,14 +1,21 @@
 #!/usr/bin/env expect
-log_user 1
+log_user 0
 log_file test.log
+
+if {$argc ne 1} {
+  puts "Must provide only the path to a tackle executable."
+  exit 1
+}
+
+set tackle [lindex $argv 0]
 
 # begin with a clean slate
 set preinstalled false
-spawn ./bin/tackle list tutstack
+spawn ./$tackle list tutstack
 expect {
     "tutstack" {
         set preinstalled true
-        exec ./bin/tackle remove tutstack
+        exec ./$tackle remove tutstack
     }
     "Error" {
         puts "Could not setup clean test enviornment"
@@ -19,7 +26,7 @@ expect {
     }
 }
 
-spawn ./bin/tackle list tutstack
+spawn ./$tackle list tutstack
 expect {
     "tutstack" {dict set results list false}
     "Error"    {dict set results list false}
@@ -27,14 +34,14 @@ expect {
 }
 
 
-spawn ./bin/tackle search tutstack
+spawn ./$tackle search tutstack
 expect {
     "An example Tcl package" {dict set results search true}
     "Error"                  {dict set results search false}
     "\n"                     {dict set results search false}
 }
 
-spawn ./bin/tackle add tutstack
+spawn ./$tackle add tutstack
 expect {
     "Added package tutstack"        {dict set results add true}
     "tutstack is already installed" {dict set results add false}
@@ -42,14 +49,14 @@ expect {
     "\n"                            {dict set results add false}
 }
 
-spawn ./bin/tackle show tutstack
+spawn ./$tackle show tutstack
 expect {
     "An example Tcl package" {dict set results show true}
     "Error"                  {dict set results show false}
     "\n"                     {dict set results show false}
 }
 
-spawn ./bin/tackle remove tutstack
+spawn ./$tackle remove tutstack
 expect {
     "Removed tutstack"          {dict set results remove true}
     "tutstack is not installed" {dict set results remove false}
@@ -58,7 +65,7 @@ expect {
 }
 
 if $preinstalled {
-    exec ./bin/tackle add tutstack
+    exec ./$tackle add tutstack
 }
 
 set passed 0
