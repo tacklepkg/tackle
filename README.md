@@ -49,9 +49,7 @@ tutstack
 $ set -Ux TCLLIBPATH $TCLLIBPATH ~/.local/share/tackle/
 $ set -Ux TCL8_6_TM_PATH $TCL8_6_TM_PATH ~/.local/share/tackle/
 ```
-3. Download the `tackle` script and place it somewhere in your `$PATH`
-
-Or, clone this repository and `$ make && make install`.
+3. Download the `bin/tackle` script and place it somewhere in your `$PATH`
 
 ## Contributing
 
@@ -60,7 +58,5 @@ In order to build Tackle you need Tcl 8.6+, Expect, and Make installed.
 A simple `$ make` will bundle dependencies, generate documentation,
 and run the test suite. `$ make install` marks the bundle as executable
 and installs it to `~/.local/bin/tackle`.
-
-
 
 Help improve Tackle on [GitHub](https://github.com/tacklepkg/tackle).
