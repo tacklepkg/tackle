@@ -1,0 +1,65 @@
+.TH TACKLE 1 "16 Nov 2021" "1.0" "User Commands"
+
+.SH NAME
+tackle \- A package manager for the Tcl programming language.
+
+.SH SYNOPSIS
+tackle [COMMAND] [ARGUMENTS...]
+
+.SH OPTIONS
+
+.BR -d ", " --debug
+  print verbose output messages
+
+.BR -h ", " --help
+  show command-line options
+
+.BR -v ", " --version
+  show the version of tackle
+
+.SH COMMANDS
+
+.BR search " QUERY"
+  lookup all packages matching \fBQUERY\fR pattern in the remote index
+
+.BR add " NAMES..."
+  add (i.e., install) packages by \fBNAMES\fR
+
+.BR remove " NAMES..."
+  remove (i.e., uninstall) packages by \fBNAMES\fR
+
+.BR list " QUERY"
+  lookup all packages matching \fBQUERY\fR pattern installed locally
+
+.BR show " NAME"
+  show details of an installed package \fBNAME\fb
+
+.SH CONFIGURATION
+Tackle installs packages and modules into \fB$TACKLEDIR\fR/local/share/tackle.
+.br
+The Tcl interpreter will not look in these directories unless you add them to
+.br
+\fBTCLLIBPATH\fR and \fBTCLX_Y_TM_PATH\fR (where X and Y are your Tcl major
+.br
+and minor versions).
+
+Tackle tracks local packages in \fB$TACKLEDIR\fR/.config/tackle/tracker.tackle. 
+
+.SH ENVIRONMENT
+
+.B TACKLEDIR
+  What Tackle treats as it's root directory. If not explictly set,
+  defaults to \fB$HOME\fR.
+
+
+.SH CONTRIBUTING
+Tackle development takes place on our GitHub organization:
+.br
+https://www.github.com/tacklepkg/tackle. There you can report bugs, give
+.br
+feedback, work on new features, and most importantly help add more packages
+.br
+to the Tackle index.
+
+.SH AUTHOR
+nat-418 (93013864+nat-418@users.noreply.github.com)

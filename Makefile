@@ -19,3 +19,5 @@ install: default
 	chmod +x ./bin/tackle
 	mkdir -p ~/.local/bin
 	cp ./bin/tackle ~/.local/bin/tackle
+	mkdir -p ~/.local/man/man1
+	cp tackle.1 ~/.local/man/man1/tackle.1

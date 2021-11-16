@@ -1,4 +1,4 @@
-#//#
+#st//#
 # Tackle is a package manager for the Tcl programming language.
 #
 # @author    nat-418
@@ -457,10 +457,10 @@ set helpMessage [::textutil::undent [::textutil::trimEmptyHeading {
     Usage
       tackle [command] [arguments...]
     
-    Meta Options
+    Options
       -d, --debug    print verbose output messages
-      -h, --help     show list of command-line options
-      -v, --version  show version of tackle
+      -h, --help     show command-line options and commands
+      -v, --version  show the version of tackle
     
     Commands
       search  QUERY  show packages available to install matching QUERY
