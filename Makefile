@@ -12,7 +12,7 @@ default:
 	cd tmp; tclsh ../lib/tpack.tcl wrap tackle.tapp
 	cp tmp/tackle.tapp ./bin/tackle
 	cd tmp; date > test.log
-	cd tmp; TACKLEPATH="$PWD" expect ../test.exp ../bin/tackle
+	cd tmp; TACKLEPATH=$(CURDIR) expect ../test.exp ../bin/tackle
 	rm -rf tmp
 
 install: default

@@ -1,5 +1,5 @@
 #!/usr/bin/env expect
-log_user 0
+
 log_file test.log
 
 if {$argc ne 1} {

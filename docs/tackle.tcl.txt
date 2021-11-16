@@ -36,7 +36,7 @@ namespace eval ::targz {
             return $directory
         } on error msg {
             puts "System tar not available, falling back to slow tar..."
-            puts $msg
+            if $debug {puts $msg}
         }
 
         set tar [file rootname $targz]
@@ -48,6 +48,7 @@ namespace eval ::targz {
             close $chan1
         } on error msg {
             puts "[redText Error:] Failed to decompress tarball: $targz."
+            if $debug {puts $msg}
             exit 1
         }
         
@@ -57,6 +58,7 @@ namespace eval ::targz {
             close $chan2
         } on error msg {
             puts "[::termColor::red Error:] Failed to write archive: $tar."
+            if $debug {puts $msg}
             exit 1
         }
         
@@ -77,6 +79,8 @@ namespace eval ::targz {
                 }
             } on error msg {
                 puts "Failed to unarchive $path."
+                if $debug {puts $msg}
+                exit 1
             }
         }
 
@@ -205,6 +209,8 @@ namespace eval ::tackle {
             set names [dict keys $index]
         } on error msg {
             puts "[::termColor::red Error:] malformed package index."
+            if $debug {puts $msg}
+            exit 1
         }
 
         foreach name [lsearch -inline -all $names $query*] {
@@ -295,6 +301,7 @@ namespace eval ::tackle {
                 set path [dict get $tracker $name path]
             } on error msg {
                 puts "$name is not installed, skipping..."
+                if $debug {puts $msg}
                 continue
             }
 
@@ -304,6 +311,7 @@ namespace eval ::tackle {
                     file delete -force $path
                 } on error msg {
                     puts "[::termColor::red Error:] failed to remove $name."
+                    if $debug {puts $msg}
                     exit 1
                 } finally {
                     puts "Removed $name."
@@ -342,6 +350,8 @@ namespace eval ::tackle {
             set names [dict keys $tracker]
         } on error msg {
             puts "[::termColor::red Error:] malformed package tracker."
+            if $debug {puts $msg}
+            exit 1
         }
 
         try {
@@ -359,6 +369,8 @@ namespace eval ::tackle {
             }
         } on error msg {
             puts "[::termColor::red Error:] $name is not installed."
+            if $debug {puts $msg}
+            exit 1
         }
 
         exit
@@ -422,6 +434,7 @@ proc withTracker {trackerFile body} {
         set tracker [readTracker $trackerFile]
     } on error msg {
         puts "[::termColor::red Error:] could not read tracker file."
+        if $debug {puts $msg}
         exit 1
     }
 
@@ -431,10 +444,12 @@ proc withTracker {trackerFile body} {
         writeTracker $trackerFile $tracker
     } on error msg {
         puts "[::termColor::red Error:] could not write tracker file."
+        if $debug {puts $msg}
         exit 1
     }
 }
 
+# A helpful message
 set helpMessage [::textutil::undent [::textutil::trimEmptyHeading {
     Tackle package manager version v0.0.8
     https://www.tacklepkg.com
@@ -455,22 +470,42 @@ set helpMessage [::textutil::undent [::textutil::trimEmptyHeading {
       show    NAME   show details of installed package NAME
 }]]
 
-# Print help message by default
-if {$argc eq 0 || [hasFlags $argv {help -h --help}]} {
-    puts $helpMessage
-    exit
-}
-
-# Print version information
-if {[hasFlags $argv {version -v --version}]} {
-    puts $version
-    exit
+# Environment variables
+try {
+    set debug $::env(DEBUG)
+} on error msg {
+    set debug false
 }
 
 try {
     set tackleDir $::env(TACKLEDIR)
 } on error msg {
     set tackleDir $::env(HOME)
+    if $debug {puts $msg}
+}
+
+
+# Handle meta options
+if {[hasFlags $argv {debug -d --debug}]} {
+    set debug true
+    set first [lindex $argv 0]
+
+    if {$first eq "debug" || $first eq "-d" || $first eq "--debug"} {
+        set argv [lrange $argv 1 end]
+    }
+
+    unset first
+}
+
+# Print help by default
+if {$argc eq 0 || [hasFlags $argv {help -h --help}]} {
+    puts $helpMessage
+    exit
+}
+
+if {[hasFlags $argv {version -v --version}]} {
+    puts $version
+    exit
 }
 
 set command     [lindex $argv 0]
@@ -484,12 +519,16 @@ if {$command eq "list" || $command eq "show"} {
         set tracker [readTracker $trackerFile]
     } on error msg {
         puts "[::termColor::red Error:] could not read tracker file."
+        if $debug {puts $msg}
+        exit 1
     }
 
     try {
         ::tackle::$command $tracker $arguments
     } on error msg {
         puts "[::termColor::red Error:] could not perform $command."
+        if $debug {puts $msg}
+        exit 1
     }
 
     exit
