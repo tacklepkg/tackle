@@ -1,13 +1,14 @@
 #!/usr/bin/env expect
-log_user 0
+log_user 1
+log_file test.log
 
 # begin with a clean slate
 set preinstalled false
-spawn ./bin/tackle ls tutstack
+spawn ./bin/tackle list tutstack
 expect {
     "tutstack" {
         set preinstalled true
-        exec ./bin/tackle rm tutstack
+        exec ./bin/tackle remove tutstack
     }
     "Error" {
         puts "Could not setup clean test enviornment"
@@ -18,11 +19,11 @@ expect {
     }
 }
 
-spawn ./bin/tackle ls tutstack
+spawn ./bin/tackle list tutstack
 expect {
-    "tutstack" {dict set results ls false}
-    "Error"    {dict set results ls false}
-    "\n"       {dict set results ls true}
+    "tutstack" {dict set results list false}
+    "Error"    {dict set results list false}
+    "\n"       {dict set results list true}
 }
 
 
@@ -48,12 +49,12 @@ expect {
     "\n"                     {dict set results show false}
 }
 
-spawn ./bin/tackle rm tutstack
+spawn ./bin/tackle remove tutstack
 expect {
-    "Removed tutstack"          {dict set results rm true}
-    "tutstack is not installed" {dict set results rm false}
-    "Error"                     {dict set results rm false}
-    "\n"                        {dict set results rm false}
+    "Removed tutstack"          {dict set results remove true}
+    "tutstack is not installed" {dict set results remove false}
+    "Error"                     {dict set results remove false}
+    "\n"                        {dict set results remove false}
 }
 
 if $preinstalled {
