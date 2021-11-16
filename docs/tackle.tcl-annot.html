@@ -16,7 +16,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dl>
 <dd>Tackle is a package manager for the Tcl programming language.
 <dl>
-<dt><strong>Version:</strong> <dd>0.0.7
+<dt><strong>Version:</strong> <dd>0.0.8
 <dt><strong>Author:</strong> <dd>nat-418
 <dt><strong>See Also:</strong> <dd><a href="https://www.github.com/tacklepkg/tackle">https://www.github.com/tacklepkg/tackle</a>
 </dl></dl>
@@ -41,13 +41,15 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Detect whether command-line flags are</td></tr>
 <tr><td><code><a href="#highlight">highlight</a> { code str }</code><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Apply ANSI bold color escape sequences to a string and then</td></tr>
+<tr><td><code><a href="#list">list</a> { tracker pattern }</code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Stay at the end to prevent name</td></tr>
 <tr><td><code><a href="#ls">ls</a> { tracker pattern }</code><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;List installed</td></tr>
 <tr><td><code><a href="#readTracker">readTracker</a> { trackerFile }</code><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get the record of what is</td></tr>
 <tr><td><code><a href="#red">red</a> { str }</code><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Make red bold</td></tr>
-<tr><td><code><a href="#rm">rm</a> { tracker names }</code><br>
+<tr><td><code><a href="#remove">remove</a> { tracker names }</code><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove</td></tr>
 <tr><td><code><a href="#search">search</a> { index tracker {query {}} }</code><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Search package index for a given package</td></tr>
@@ -81,7 +83,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>names</code> - List of package names to install
 <dt><strong>Returns:</strong>
 <dd> Updated dictionary of installed packages
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#add_235">tackle.tcl, line 235</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#add_240">tackle.tcl, line 240</a>
 </dl></dl>
 
 <hr>
@@ -93,7 +95,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>str</code> - String to be colored
 <dt><strong>Returns:</strong>
 <dd> String with proper escape codes
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#bright_152">tackle.tcl, line 152</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#bright_168">tackle.tcl, line 168</a>
 </dl></dl>
 
 <hr>
@@ -105,7 +107,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>url</code> - URL target for the HTTP request
 <dt><strong>Returns:</strong>
 <dd> Body of the HTTP response
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#fetch_180">tackle.tcl, line 180</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#fetch_133">tackle.tcl, line 133</a>
 </dl></dl>
 
 <hr>
@@ -133,7 +135,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>str</code> - String to be colored
 <dt><strong>Returns:</strong>
 <dd> String with proper escape codes
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#green_164">tackle.tcl, line 164</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#green_180">tackle.tcl, line 180</a>
 </dl></dl>
 
 <hr>
@@ -147,7 +149,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>flags</code> - List of flags to look for
 <dt><strong>Returns:</strong>
 <dd> Boolean where true indicates presence of at least one flag
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#hasFlags_370">tackle.tcl, line 370</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#hasFlags_379">tackle.tcl, line 379</a>
 </dl></dl>
 
 <hr>
@@ -163,7 +165,15 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd> String with proper escape codes
 <dt><strong>See Also:</strong>
 <dd><a href="https://en.wikipedia.org/wiki/ANSI_escape_code">https://en.wikipedia.org/wiki/ANSI_escape_code</a>
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#highlight_140">tackle.tcl, line 140</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#highlight_156">tackle.tcl, line 156</a>
+</dl></dl>
+
+<hr>
+<h3><a name="list">list</a></h3>
+<pre>proc list { tracker pattern }</pre>
+<dl>
+<dd>Stay at the end to prevent name collisions.<dl>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#list_368">tackle.tcl, line 368</a>
 </dl></dl>
 
 <hr>
@@ -177,7 +187,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>pattern</code> - Glob-style pattern of package names
 <dt><strong>Returns:</strong>
 <dd> Void: side-effect is to print package names to the console.
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#ls_320">tackle.tcl, line 320</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#ls_325">tackle.tcl, line 325</a>
 </dl></dl>
 
 <hr>
@@ -189,7 +199,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>trackerFile</code> - Path to the tacker.tackle file
 <dt><strong>Returns:</strong>
 <dd> Contents of the file
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#readTracker_383">tackle.tcl, line 383</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#readTracker_392">tackle.tcl, line 392</a>
 </dl></dl>
 
 <hr>
@@ -201,12 +211,12 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>str</code> - String to be colored
 <dt><strong>Returns:</strong>
 <dd> String with proper escape codes
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#red_158">tackle.tcl, line 158</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#red_174">tackle.tcl, line 174</a>
 </dl></dl>
 
 <hr>
-<h3><a name="rm">rm</a></h3>
-<pre>proc rm { tracker names }</pre>
+<h3><a name="remove">remove</a></h3>
+<pre>proc remove { tracker names }</pre>
 <dl>
 <dd>Remove (i.e. uninstall) packages<dl>
 <dt><strong>Parameters:</strong>
@@ -215,7 +225,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>names</code> - List of package names to uninstall
 <dt><strong>Returns:</strong>
 <dd> Updated dictionary of installed packages
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#rm_284">tackle.tcl, line 284</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#remove_289">tackle.tcl, line 289</a>
 </dl></dl>
 
 <hr>
@@ -231,7 +241,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>query</code> - String of what package we are looking for
 <dt><strong>Returns:</strong>
 <dd> Void: side-effect is to print search results
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#search_198">tackle.tcl, line 198</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#search_203">tackle.tcl, line 203</a>
 </dl></dl>
 
 <hr>
@@ -245,7 +255,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>name</code> - Name of a pattern to detail
 <dt><strong>Returns:</strong>
 <dd> Void: side-effect is to print package details to the console.
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#show_335">tackle.tcl, line 335</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#show_340">tackle.tcl, line 340</a>
 </dl></dl>
 
 <hr>
@@ -273,7 +283,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>body</code> - Operations to perform with tracker data
 <dt><strong>Returns:</strong>
 <dd> Void. Side-effect: preform body and write tracker data
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#withTracker_411">tackle.tcl, line 411</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#withTracker_420">tackle.tcl, line 420</a>
 </dl></dl>
 
 <hr>
@@ -287,7 +297,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>data</code> - Updated data
 <dt><strong>Returns:</strong>
 <dd> Void. Side-effect: write data to tracker file
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#writeTracker_400">tackle.tcl, line 400</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#writeTracker_409">tackle.tcl, line 409</a>
 </dl></dl>
 
 <hr>
@@ -299,7 +309,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <dd><code>str</code> - String to be colored
 <dt><strong>Returns:</strong>
 <dd> String with proper escape codes
-<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#yellow_170">tackle.tcl, line 170</a>
+<dt><strong>Defined in:</strong><dd><a href="tackle.tcl.html#yellow_186">tackle.tcl, line 186</a>
 </dl></dl>
 
 <hr>
@@ -308,7 +318,7 @@ Created from <strong><code>src/tackle.tcl</strong></code>
 <a href="index_main.html#byprocname">procedure name</a> |
 <a href="index_main.html#bycall">procedure call</a> |
 <a href="index_annot_full.html">annotation</a><br>
-<cite>Index generated 2021-11-14 at 00:05.</cite>
+<cite>Index generated 2021-11-16 at 21:24.</cite>
 </font>
 </body>
 </html>

@@ -2,14 +2,14 @@
 # Tackle is a package manager for the Tcl programming language.
 #
 # @author    nat-418
-# @version   0.0.7
+# @version   0.0.8
 # @see       https://www.github.com/tacklepkg/tackle
 #//#
 package require http
 package require tls
 package require textutil
 
-set version 0.0.7
+set version 0.0.8
 
 # We begin by inlining a few dependencies
 # =======================================
@@ -92,7 +92,7 @@ namespace eval ::httpRedirects {
     package require http
     package require uri
 
-    namespace export geturl
+    namespace export geturl fetch
 
     # GETs through HTTP redirects
     #
@@ -124,6 +124,22 @@ namespace eval ::httpRedirects {
             # problem w/ relative versus absolute paths
             set url [::uri::join {*}[array get uri]]
         }
+    }
+
+    # Helper function to perform a GET request. Throws if response is not 200 OK.
+    #
+    # @param  url  URL target for the HTTP request
+    # @return Body of the HTTP response
+    proc fetch url {
+        set token [::httpRedirects::geturl $url]
+        set code  [::http::ncode $token]
+        set data  [::http::data $token]
+
+        if {$code ne 200} {
+            error "HTTP request for $url failed."
+        }
+
+        return $data
     }
 }
 
@@ -170,193 +186,186 @@ namespace eval ::termColor {
     proc yellow str {highlight "1;33m" $str}
 }
 
-# Here we define the procedures of Tackle proper
-# ==============================================
 
-# Helper function to perform a GET request. Throws if response is not 200 OK.
-#
-# @param  url  URL target for the HTTP request
-# @return Body of the HTTP response
-proc fetch url {
-    set token [::httpRedirects::geturl $url]
-    set code  [::http::ncode $token]
-    set data  [::http::data $token]
 
-    if {$code ne 200} {
-        error "HTTP request for $url failed."
-    }
+# Here we define Tackle proper
+# ============================
+# Pretty colors in the console
+namespace eval ::tackle {
+    namespace export search add remove list show
 
-    return $data
-}
-
-# Search package index for a given package name
-#
-# @param  index   Dictionary of installable packages
-# @param  tracker Dictionary of installed packages
-# @param  query   String of what package we are looking for
-# @return Void: side-effect is to print search results
-proc search {index tracker {query ""}} {
-    try {
-        set names [dict keys $index]
-    } on error msg {
-        puts "[::termColor::red Error:] malformed package index."
-    }
-
-    foreach name [lsearch -inline -all $names $query*] {
-        dict with index $name {
-            if [dict exists $tracker $name] {
-                set installed [::termColor::yellow installed]
-            } else {
-                set installed ""
-            }
-
-            if {$type eq "module"} {
-                set hiName [::termColor::yellow $name]
-            } else {
-                set hiName [::termColor::green $name]
-            }
-
-            puts "$hiName [::termColor::bright v$version] $installed"
-            puts "  $description"
-            puts "  [string totitle $type] URL: $url"
-            puts ""
-        }
-    }
-
-    exit
-}
-
-# Add (i.e. install) packages
-#
-# @param  index   Dictionary of installable packages
-# @param  tracker Dictionary of installed packages
-# @param  names   List of package names to install
-# @return         Updated dictionary of installed packages
-proc add {index tracker names} {
-    upvar 2 tacklepath destination
-
-    set installed      [dict keys $tracker]
-    set updatedTracker $tracker
-
-    foreach name $names {
-        if {$name in $installed || [file isdirectory $name]} {
-            puts "$name is already installed, skipping..."
-            continue
-        }
-
-        dict set updatedTracker $name [dict get $index $name]
-
-        dict with index $name {
-            file mkdir $destination
-             
-            set payload  [fetch $url]
-            set filename [file join $destination [file tail $url]]
-
-            set channel [open $filename wb]
-            puts -nonewline $channel $payload
-            close $channel
-
-            if {$type eq "package"} {
-                set unpacked [::targz::unpack $filename $destination]
-                dict set updatedTracker $name path $unpacked
-            } else {
-                dict set updatedTracker $name path $filename
-            }
-            
-            if {[info exists setup]} {
-                exec sh -c [subst $setup]
-            }
-
-            puts "Added $type $name v$version"
-            puts "from $url"
-            puts "to $unpacked"
-        }
-    }
-
-    return $updatedTracker
-}
-
-# Remove (i.e. uninstall) packages
-#
-# @param  tracker Dictionary of installed packages
-# @param  names   List of package names to uninstall
-# @return Updated dictionary of installed packages
-proc rm {tracker names} {
-    set installed      [dict keys $tracker]
-    set updatedTracker $tracker
-
-    foreach name $names {
+    # Search package index for a given package name
+    #
+    # @param  index   Dictionary of installable packages
+    # @param  tracker Dictionary of installed packages
+    # @param  query   String of what package we are looking for
+    # @return Void: side-effect is to print search results
+    proc search {index tracker {query ""}} {
         try {
-            set path [dict get $tracker $name path]
+            set names [dict keys $index]
         } on error msg {
-            puts "$name is not installed, skipping..."
-            continue
+            puts "[::termColor::red Error:] malformed package index."
         }
 
-        if {$name in $installed && [file isdirectory $path]} {
+        foreach name [lsearch -inline -all $names $query*] {
+            dict with index $name {
+                if [dict exists $tracker $name] {
+                    set installed [::termColor::yellow installed]
+                } else {
+                    set installed ""
+                }
+
+                if {$type eq "module"} {
+                    set hiName [::termColor::yellow $name]
+                } else {
+                    set hiName [::termColor::green $name]
+                }
+
+                puts "$hiName [::termColor::bright v$version] $installed"
+                puts "  $description"
+                puts "  [string totitle $type] URL: $url"
+                puts ""
+            }
+        }
+
+        exit
+    }
+
+    # Add (i.e. install) packages
+    #
+    # @param  index   Dictionary of installable packages
+    # @param  tracker Dictionary of installed packages
+    # @param  names   List of package names to install
+    # @return         Updated dictionary of installed packages
+    proc add {index tracker names} {
+        upvar 2 tacklepath destination
+
+        set installed      [dict keys $tracker]
+        set updatedTracker $tracker
+
+        foreach name $names {
+            if {$name in $installed || [file isdirectory $name]} {
+                puts "$name is already installed, skipping..."
+                continue
+            }
+
+            dict set updatedTracker $name [dict get $index $name]
+
+            dict with index $name {
+                file mkdir $destination
+                 
+                set payload  [::httpRedirects::fetch $url]
+                set filename [file join $destination [file tail $url]]
+
+                set channel [open $filename wb]
+                puts -nonewline $channel $payload
+                close $channel
+
+                if {$type eq "package"} {
+                    set unpacked [::targz::unpack $filename $destination]
+                    dict set updatedTracker $name path $unpacked
+                } else {
+                    dict set updatedTracker $name path $filename
+                }
+                
+                if {[info exists setup]} {
+                    exec sh -c [subst $setup]
+                }
+
+                puts "Added $type $name v$version"
+                puts "from $url"
+                puts "to $unpacked"
+            }
+        }
+
+        return $updatedTracker
+    }
+
+    # Remove (i.e. uninstall) packages
+    #
+    # @param  tracker Dictionary of installed packages
+    # @param  names   List of package names to uninstall
+    # @return Updated dictionary of installed packages
+    proc remove {tracker names} {
+        set installed      [dict keys $tracker]
+        set updatedTracker $tracker
+
+        foreach name $names {
             try {
-                set updatedTracker [dict remove $updatedTracker $name]
-                file delete -force $path
+                set path [dict get $tracker $name path]
             } on error msg {
-                puts "[::termColor::red Error:] failed to remove $name."
-                exit 1
-            } finally {
-                puts "Removed $name."
+                puts "$name is not installed, skipping..."
+                continue
             }
-        } else {
-            puts "[::termColor::red Error:] tracker out of sync with packages."
-            exit 1
-        }
-    }
-    
-    return $updatedTracker
-}
 
-# List installed packages
-#
-# @param  tracker Dictionary of installed packages
-# @param  pattern Glob-style pattern of package names
-# @return Void: side-effect is to print package names to the console.
-proc ls {tracker pattern} {
-    set names [dict keys $tracker]
-
-    if {$names eq ""} exit
-
-    puts [string map {" " \n} [lsearch -inline -all $names $pattern*]]
-
-    exit
-}
-
-# Show details of an installed package
-#
-# @param  tracker Dictionary of installed packages
-# @param  name    Name of a pattern to detail
-# @return Void: side-effect is to print package details to the console.
-proc show {tracker name} {
-    try {
-        set names [dict keys $tracker]
-    } on error msg {
-        puts "[::termColor::red Error:] malformed package tracker."
-    }
-
-    try {
-        dict with tracker $name {
-            if {$type eq "module"} {
-                set hiName [::termColor::yellow $name]
+            if {$name in $installed && [file isdirectory $path]} {
+                try {
+                    set updatedTracker [dict remove $updatedTracker $name]
+                    file delete -force $path
+                } on error msg {
+                    puts "[::termColor::red Error:] failed to remove $name."
+                    exit 1
+                } finally {
+                    puts "Removed $name."
+                }
             } else {
-                set hiName [::termColor::green $name]
+                puts "[::termColor::red Error:] tracker out of sync with packages."
+                exit 1
             }
-            puts "$hiName [::termColor::bright v$version]"
-            puts "  $description"
-            puts "  [string totitle $type] URL: $url"
-            puts "  Path: $path"
-            puts ""
         }
-    } on error msg {
-        puts "[::termColor::red Error:] $name is not installed."
+        
+        return $updatedTracker
     }
 
-    exit
+    # List installed packages
+    #
+    # @param  tracker Dictionary of installed packages
+    # @param  pattern Glob-style pattern of package names
+    # @return Void: side-effect is to print package names to the console.
+    proc ls {tracker pattern} {
+        set names [dict keys $tracker]
+
+        if {$names eq ""} exit
+
+        puts [string map {" " \n} [lsearch -inline -all $names $pattern*]]
+
+        exit
+    }
+
+    # Show details of an installed package
+    #
+    # @param  tracker Dictionary of installed packages
+    # @param  name    Name of a pattern to detail
+    # @return Void: side-effect is to print package details to the console.
+    proc show {tracker name} {
+        try {
+            set names [dict keys $tracker]
+        } on error msg {
+            puts "[::termColor::red Error:] malformed package tracker."
+        }
+
+        try {
+            dict with tracker $name {
+                if {$type eq "module"} {
+                    set hiName [::termColor::yellow $name]
+                } else {
+                    set hiName [::termColor::green $name]
+                }
+                puts "$hiName [::termColor::bright v$version]"
+                puts "  $description"
+                puts "  [string totitle $type] URL: $url"
+                puts "  Path: $path"
+                puts ""
+            }
+        } on error msg {
+            puts "[::termColor::red Error:] $name is not installed."
+        }
+
+        exit
+    }
+
+    # Stay at the end to prevent name collisions.
+    proc list {tracker pattern} {ls $tracker $pattern}
 }
 
 # Below we handle user input, execute commands, etc.
@@ -426,30 +435,29 @@ proc withTracker {trackerFile body} {
     }
 }
 
-set helpMessage [::textutil::undent [::textutil::trimEmptyHeading "
-    Tackle package manager version v$version
+set helpMessage [::textutil::undent [::textutil::trimEmptyHeading {
+    Tackle package manager version v0.0.8
     https://www.tacklepkg.com
     
     Usage
-      tackle \[command\] \[arguments...\]
+      tackle [command] [arguments...]
     
     Meta Options
+      -d, --debug    print verbose output messages
       -h, --help     show list of command-line options
       -v, --version  show version of tackle
     
     Commands
-      help           show list of command-line options
-      version        show version of tackle
       search  QUERY  show packages available to install matching QUERY
       add     NAMES  install   packages by NAMES
-      rm      NAMES  uninstall packages by NAMES
-      ls      QUERY  show installed packages matching QUERY
+      remove  NAMES  uninstall packages by NAMES
+      list    QUERY  show installed packages matching QUERY
       show    NAME   show details of installed package NAME
-"]]
+}]]
 
 # Print help message by default
 if {$argc eq 0 || [hasFlags $argv {help -h --help}]} {
-    puts $helpMexsage
+    puts $helpMessage
     exit
 }
 
@@ -459,13 +467,19 @@ if {[hasFlags $argv {version -v --version}]} {
     exit
 }
 
+try {
+    set tackleDir $::env(TACKLEDIR)
+} on error msg {
+    set tackleDir $::env(HOME)
+}
+
 set command     [lindex $argv 0]
 set arguments   [lrange $argv 1 end]
-set tacklepath  [file join $::env(HOME) .local share tackle]
-set trackerFile [file join $::env(HOME) .config tackle tracker.tackle]
+set tacklepath  [file join $tackleDir .local share tackle]
+set trackerFile [file join $tackleDir .config tackle tracker.tackle]
 
 # We don't need network or file modfication to check local state.
-if {$command eq "ls" || $command eq "show"} {
+if {$command eq "list" || $command eq "show"} {
     try {
         set tracker [readTracker $trackerFile]
     } on error msg {
@@ -473,7 +487,7 @@ if {$command eq "ls" || $command eq "show"} {
     }
 
     try {
-        $command $tracker $arguments
+        ::tackle::$command $tracker $arguments
     } on error msg {
         puts "[::termColor::red Error:] could not perform $command."
     }
@@ -488,7 +502,7 @@ if {$command eq "search" || $command eq "add"} {
         ::http::register https 443 [list ::tls::socket -tls1 1]
 
         # Get the latest available packages
-        set index [fetch \
+        set index [::httpRedirects::fetch \
             https://raw.githubusercontent.com/tacklepkg/packages/master/index.tackle]
     } on error msg {
         puts "[::termColor::red Error:] could not fetch package index."
@@ -498,7 +512,7 @@ if {$command eq "search" || $command eq "add"} {
     withTracker $trackerFile {
         upvar command cmd index ind arguments args
         try {
-            set tracker [$cmd $ind $tracker $args]
+            set tracker [::tackle::$cmd $ind $tracker $args]
         } on error msg {
             puts "[::termColor::red Error:] could not perform $cmd."
             puts $msg
@@ -510,11 +524,11 @@ if {$command eq "search" || $command eq "add"} {
 }
 
 # Removing packages requires tracker data.
-if {$command eq "rm"} {
+if {$command eq "remove"} {
     withTracker $trackerFile {
         upvar command cmd arguments args
         try {
-            set tracker [$cmd $tracker $args]
+            set tracker [::tackle::$cmd $tracker $args]
         } on error msg {
             puts "[::termColor::red Error:] could not perform $cmd."
             puts $msg

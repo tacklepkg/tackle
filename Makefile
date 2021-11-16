@@ -12,7 +12,8 @@ default:
 	cd tmp; tclsh ../lib/tpack.tcl wrap tackle.tapp
 	cp tmp/tackle.tapp bin/tackle
 	rm -rf tmp
-	expect test.tcl
+	date > test.log
+	expect test.exp
 
 install: default
 	chmod +x bin/tackle
