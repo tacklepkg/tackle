@@ -17,8 +17,8 @@ modules.
 |-----------------------------------|------------------------------------------|
 | `$ tackle package search $query`  | Search for available packages by `$query`|
 | `$ tackle package add $names`     | Install packages by `$names`             |
-| `$ tackle package rm  $names`     | Uninstall packages by `$names`           |
-| `$ tackle package ls`             | List installed packages                  |
+| `$ tackle package remove  $names` | Uninstall packages by `$names`           |
+| `$ tackle package list`           | List installed packages                  |
 | `$ tackle package show $name`     | Detail an installed package by `$name`   |
 
 
@@ -37,7 +37,7 @@ Added package tutstack v1.0.0
 from https://github.com/tacklepkg/packages/raw/master/tutstack/tutstack.tar.gz
 to /home/username/.local/share/tackle/tutstack
 Done.
-$ tackle ls
+$ tackle list
 tutstack
 ```
 
@@ -49,8 +49,10 @@ tutstack
 $ set -Ux TCLLIBPATH $TCLLIBPATH ~/.local/share/tackle/
 $ set -Ux TCL8_6_TM_PATH $TCL8_6_TM_PATH ~/.local/share/tackle/
 ```
-3. Download the `tackle` script and place it somewhere in your `$PATH`.
+3. Download the `tackle` script and place it somewhere in your `$PATH`
 
+Or, clone this repository and `$ make && make install`.
+m
 ## Contributing
 
 In order to build Tackle you need Tcl 8.6+, Expect, and Make installed.
